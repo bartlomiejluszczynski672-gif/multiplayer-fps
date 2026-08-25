@@ -1,0 +1,27 @@
+{
+  "name": "multiplayer-fps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bartlomiejluszczynski672-gif/multiplayer-fps.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bartlomiejluszczynski672-gif/multiplayer-fps/issues"
+  },
+  "homepage": "https://github.com/bartlomiejluszczynski672-gif/multiplayer-fps#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3",
+    "three": "^0.185.1"
+  }
+}

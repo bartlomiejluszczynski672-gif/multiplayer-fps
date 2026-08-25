@@ -1,0 +1,134 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #111;
+}
+
+canvas {
+    display: block;
+}
+
+#hud {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    color: white;
+    z-index: 10;
+}
+
+#health {
+    position: absolute;
+    left: 25px;
+    bottom: 25px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#ammo {
+    position: absolute;
+    right: 25px;
+    bottom: 25px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#crosshair {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#startScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #111;
+    color: white;
+    text-align: center;
+}
+
+#startScreen h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+#startScreen p {
+    margin-bottom: 30px;
+    font-size: 18px;
+}
+
+#startButton {
+    border: none;
+    padding: 15px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+#mobileControls {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    #mobileControls {
+        display: block;
+    }
+
+    #joystick {
+        position: fixed;
+        left: 30px;
+        bottom: 40px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        z-index: 20;
+    }
+
+    #joystickHandle {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        left: 35px;
+        top: 35px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    #mobileActions {
+        position: fixed;
+        right: 25px;
+        bottom: 30px;
+        display: flex;
+        gap: 10px;
+        z-index: 20;
+    }
+
+    #mobileActions button {
+        width: 80px;
+        height: 60px;
+        border: none;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        font-weight: bold;
+    }
+}

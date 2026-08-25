@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>Multiplayer FPS</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="hud">
+        <div id="health">HP: 100</div>
+        <div id="ammo">AMMO: 12 / 36</div>
+        <div id="crosshair">+</div>
+    </div>
+
+    <div id="startScreen">
+        <h1>MULTIPLAYER FPS</h1>
+        <p>Click to enter the game</p>
+        <button id="startButton">PLAY</button>
+    </div>
+
+    <div id="mobileControls">
+        <div id="joystick">
+            <div id="joystickHandle"></div>
+        </div>
+
+        <div id="mobileActions">
+            <button id="shootButton">SHOOT</button>
+            <button id="reloadButton">RELOAD</button>
+            <button id="jumpButton">JUMP</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="game.js"></script>
+
+</body>
+</html>
