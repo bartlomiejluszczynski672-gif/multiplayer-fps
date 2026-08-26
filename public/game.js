@@ -18,6 +18,10 @@ const playerSpeed = 0.12;
 
 let lastNetworkUpdate = 0;
 
+let kills = 0;
+let deaths = 0;
+let isDead = false;
+
 // WEAPON SETTINGS
 let ammo = 12;
 let reserveAmmo = 36;
@@ -311,10 +315,25 @@ function setupControls() {
                     .style.display = "none";
             }
         );
+
+    renderer.domElement.addEventListener(
+        "click",
+        () => {
+            if (isDead) return;
+
+            if (
+                document.pointerLockElement !==
+                document.body
+            ) {
+                document.body.requestPointerLock();
+            }
+        }
+    );
 }
 
 function updateMovement() {
     if (!player) return;
+    if (isDead) return;
 
     const direction = new THREE.Vector3();
 
@@ -361,6 +380,7 @@ function updateMovement() {
 }
 
 function shoot() {
+    if (isDead) return;
     if (!canShoot) return;
     if (isReloading) return;
 
@@ -404,6 +424,8 @@ function shoot() {
         console.log(
             "Player hit!"
         );
+
+        showHitmarker();
 
         createHitEffect(
             hits[0].point
@@ -545,6 +567,20 @@ function createHitEffect(position) {
         scene.remove(effect);
     }, 200);
 }
+function showHitmarker() {
+    const hitmarker =
+        document.getElementById(
+            "hitmarker"
+        );
+
+    hitmarker.style.display =
+        "block";
+
+    setTimeout(() => {
+        hitmarker.style.display =
+            "none";
+    }, 120);
+}
 
 function updateHUD() {
     document.getElementById(
@@ -554,12 +590,12 @@ function updateHUD() {
 }
 
 function sendPlayerPosition() {
+    if (isDead) return;
+
     const now = Date.now();
 
     if (
-        now -
-        lastNetworkUpdate <
-        50
+        now - lastNetworkUpdate < 50
     ) {
         return;
     }
@@ -749,6 +785,160 @@ socket.on(
     }
 );
 
+socket.on(
+    "playerStats",
+    (data) => {
+        kills = data.kills;
+        deaths = data.deaths;
+
+        document.getElementById(
+            "stats"
+        ).textContent =
+            `KILLS: ${kills} | DEATHS: ${deaths}`;
+    }
+);
+
+socket.on(
+    "playerDied",
+    () => {
+        console.log("YOU DIED EVENT RECEIVED");
+
+        isDead = true;
+
+        const deathScreen =
+            document.getElementById(
+                "deathScreen"
+            );
+
+        const respawnText =
+            document.getElementById(
+                "respawnText"
+            );
+
+        if (deathScreen) {
+            deathScreen.style.display =
+                "flex";
+        }
+
+        if (respawnText) {
+            respawnText.textContent =
+                "Respawning in 3...";
+        }
+
+        if (
+            document.pointerLockElement
+        ) {
+            document.exitPointerLock();
+        }
+
+        setTimeout(() => {
+            if (
+                isDead &&
+                respawnText
+            ) {
+                respawnText.textContent =
+                    "Respawning in 2...";
+            }
+        }, 1000);
+
+        setTimeout(() => {
+            if (
+                isDead &&
+                respawnText
+            ) {
+                respawnText.textContent =
+                    "Respawning in 1...";
+            }
+        }, 2000);
+    }
+);
+   
+
+socket.on(
+    "playerRespawn",
+    (data) => {
+        console.log(
+            "RESPAWN EVENT RECEIVED"
+        );
+
+        player.position.set(
+            data.x,
+            data.y,
+            data.z
+        );
+
+        document.getElementById(
+            "health"
+        ).textContent =
+            `HP: ${data.health}`;
+
+        const deathScreen =
+            document.getElementById(
+                "deathScreen"
+            );
+
+        if (deathScreen) {
+            deathScreen.style.display =
+                "none";
+        }
+
+        isDead = false;
+    }
+);
+socket.on(
+    "playerKilled",
+    (data) => {
+        if (
+            data.playerId ===
+            socket.id
+        ) {
+            return;
+        }
+
+        const deadPlayer =
+            otherPlayers[
+                data.playerId
+            ];
+
+        if (deadPlayer) {
+            deadPlayer.visible =
+                false;
+        }
+    }
+);
+
+socket.on(
+    "playerRespawned",
+    (data) => {
+        if (
+            data.playerId ===
+            socket.id
+        ) {
+            return;
+        }
+
+        const respawnedPlayer =
+            otherPlayers[
+                data.playerId
+            ];
+
+        if (
+            respawnedPlayer
+        ) {
+            respawnedPlayer
+                .position
+                .set(
+                    data.x,
+                    data.y,
+                    data.z
+                );
+
+            respawnedPlayer.visible =
+                true;
+        }
+    }
+);
+
 function onResize() {
     camera.aspect =
         window.innerWidth /
@@ -760,4 +950,5 @@ function onResize() {
         window.innerWidth,
         window.innerHeight
     );
+
 }

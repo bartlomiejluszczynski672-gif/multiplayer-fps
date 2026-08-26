@@ -131,4 +131,85 @@ canvas {
         color: white;
         font-weight: bold;
     }
+}#stats {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#hitmarker {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 38px;
+    display: none;
+}
+
+#deathScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    text-align: center;
+}
+
+#deathScreen h1 {
+    font-size: 64px;
+    margin-bottom: 10px;
+}
+
+#deathScreen p {
+    font-size: 22px;
+}
+
+#stats {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#hitmarker {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 38px;
+    display: none;
+}
+
+#deathScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(0, 0, 0, 0.9);
+
+    color: white;
+    text-align: center;
+
+    pointer-events: all;
+}
+
+#deathScreen h1 {
+    font-size: 64px;
+    margin-bottom: 15px;
+}
+
+#deathScreen p {
+    font-size: 24px;
 }
