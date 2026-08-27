@@ -16,25 +16,40 @@ app.use(
 );
 
 const players = {};
+const spawnPoints = [
+    { x: -35, y: 0.9, z: -35 },
+    { x: 35, y: 0.9, z: -35 },
+    { x: -35, y: 0.9, z: 35 },
+    { x: 35, y: 0.9, z: 35 },
+    { x: -20, y: 0.9, z: 0 },
+    { x: 20, y: 0.9, z: 0 }
+];
 
+function getRandomSpawnPoint() {
+    return spawnPoints[
+        Math.floor(
+            Math.random() * spawnPoints.length
+        )
+    ];
+}
 io.on("connection", (socket) => {
     console.log(
         "Player connected:",
         socket.id
     );
-
+const spawn =
+    getRandomSpawnPoint();
     players[socket.id] = {
-        id: socket.id,
-        x: 0,
-        y: 0.9,
-        z: 5,
-        rotationY: 0,
-        health: 100,
-        kills: 0,
-        deaths: 0,
-        dead: false
-    };
-
+    id: socket.id,
+    x: spawn.x,
+    y: spawn.y,
+    z: spawn.z,
+    rotationY: 0,
+    health: 100,
+    kills: 0,
+    deaths: 0,
+    dead: false
+};
     socket.emit(
         "currentPlayers",
         players
@@ -177,17 +192,17 @@ if (data.weapon === "pistol") {
                     target.health = 100;
                     target.dead = false;
 
-                    target.x =
-                        Math.random() *
-                            20 -
-                        10;
+                    const respawnPoint =
+    getRandomSpawnPoint();
 
-                    target.y = 0.9;
+target.x =
+    respawnPoint.x;
 
-                    target.z =
-                        Math.random() *
-                            20 -
-                        10;
+target.y =
+    respawnPoint.y;
+
+target.z =
+    respawnPoint.z;
 
                     io.to(
                         data.targetId

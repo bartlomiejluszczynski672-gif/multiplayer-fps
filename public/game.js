@@ -13,6 +13,14 @@ let pitch = 0;
 
 const keys = {};
 const otherPlayers = {};
+const spawnPoints = [
+    { x: -35, y: 0.9, z: -35 },
+    { x: 35, y: 0.9, z: -35 },
+    { x: -35, y: 0.9, z: 35 },
+    { x: 35, y: 0.9, z: 35 },
+    { x: -20, y: 0.9, z: 0 },
+    { x: 20, y: 0.9, z: 0 }
+];
 const colliders = [];
 const playerSpeed = 0.12;
 
