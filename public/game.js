@@ -22,16 +22,35 @@ let kills = 0;
 let deaths = 0;
 let isDead = false;
 
-// WEAPON SETTINGS
-let ammo = 12;
-let reserveAmmo = 36;
-const magazineSize = 12;
+// WEAPON SYSTEM
+const weapons = {
+    pistol: {
+        name: "TACTICAL PISTOL",
+        magazineSize: 12,
+        ammo: 12,
+        reserveAmmo: 36,
+        damage: 25,
+        fireDelay: 250,
+        reloadTime: 1400,
+        recoil: 0.025
+    },
+
+    heavyPistol: {
+        name: "HEAVY PISTOL",
+        magazineSize: 7,
+        ammo: 7,
+        reserveAmmo: 21,
+        damage: 50,
+        fireDelay: 600,
+        reloadTime: 1800,
+        recoil: 0.05
+    }
+};
+
+let currentWeaponKey = "pistol";
 
 let isReloading = false;
 let canShoot = true;
-
-const fireDelay = 250;
-const reloadTime = 1400;
 
 init();
 
@@ -195,7 +214,9 @@ function createPlayer() {
         5
     );
 }
-
+function getCurrentWeapon() {
+    return weapons[currentWeaponKey];
+}
 function createWeapon() {
     weapon = new THREE.Group();
 
@@ -248,7 +269,41 @@ function createWeapon() {
     camera.add(weapon);
     scene.add(camera);
 }
+function updateWeaponModel() {
+    if (!weapon) return;
 
+    weapon.rotation.set(0, 0, 0);
+    weapon.position.set(0, 0, 0);
+    weapon.scale.set(1, 1, 1);
+
+    if (currentWeaponKey === "pistol") {
+        weapon.scale.set(
+            1,
+            1,
+            1
+        );
+
+        weapon.position.set(
+            0,
+            0,
+            0
+        );
+    }
+
+    if (currentWeaponKey === "heavyPistol") {
+        weapon.scale.set(
+            1.35,
+            1.2,
+            1.3
+        );
+
+        weapon.position.set(
+            0.03,
+            -0.03,
+            0.02
+        );
+    }
+}
 function setupControls() {
     document.addEventListener(
         "keydown",
@@ -258,6 +313,14 @@ function setupControls() {
             if (event.code === "KeyR") {
                 reload();
             }
+            
+            if (event.code === "Digit1") {
+    switchWeapon("pistol");
+}
+
+if (event.code === "Digit2") {
+    switchWeapon("heavyPistol");
+}
         }
     );
 
@@ -378,26 +441,44 @@ function updateMovement() {
     camera.rotation.y = yaw;
     camera.rotation.x = pitch;
 }
+function switchWeapon(weaponKey) {
+    if (!weapons[weaponKey]) return;
+    if (isReloading) return;
+    if (weaponKey === currentWeaponKey) return;
 
+    currentWeaponKey = weaponKey;
+
+    if (weapon) {
+        weapon.position.y = -0.25;
+    }
+
+    setTimeout(() => {
+        updateWeaponModel();
+        updateHUD();
+
+        if (weapon) {
+            weapon.position.y = 0;
+        }
+    }, 180);
+}
 function shoot() {
     if (isDead) return;
     if (!canShoot) return;
     if (isReloading) return;
-
-    if (ammo <= 0) {
+const currentWeapon = getCurrentWeapon();
+    if (currentWeapon.ammo <= 0) {
         reload();
         return;
     }
 
-    ammo--;
-
+    currentWeapon.ammo--;
     updateHUD();
 
     canShoot = false;
 
     setTimeout(() => {
         canShoot = true;
-    }, fireDelay);
+    }, currentWeapon.fireDelay);
 
     createMuzzleFlash();
     applyRecoil();
@@ -432,24 +513,36 @@ function shoot() {
         );
 
         socket.emit(
-            "playerShot",
-            {
-                targetId:
-                    hitPlayer.userData.playerId,
-                damage: 25
-            }
-        );
+    "playerShot",
+    {
+        targetId:
+            hitPlayer.userData.playerId,
+        damage: currentWeapon.damage,
+        weapon: currentWeaponKey
+    }
+);
     }
 }
 
+
+
 function reload() {
+   
     if (isReloading) return;
 
-    if (ammo === magazineSize) {
+    const currentWeapon =
+        getCurrentWeapon();
+
+    if (
+        currentWeapon.ammo ===
+        currentWeapon.magazineSize
+    ) {
         return;
     }
 
-    if (reserveAmmo <= 0) {
+    if (
+        currentWeapon.reserveAmmo <= 0
+    ) {
         return;
     }
 
@@ -457,45 +550,63 @@ function reload() {
 
     document.getElementById(
         "ammo"
-    ).textContent = "RELOADING...";
+    ).textContent =
+        "RELOADING...";
 
     animateReload();
 
     setTimeout(() => {
         const missingAmmo =
-            magazineSize - ammo;
+            currentWeapon.magazineSize -
+            currentWeapon.ammo;
 
         const ammoToLoad =
             Math.min(
                 missingAmmo,
-                reserveAmmo
+                currentWeapon.reserveAmmo
             );
 
-        ammo += ammoToLoad;
-        reserveAmmo -= ammoToLoad;
+        currentWeapon.ammo +=
+            ammoToLoad;
+
+        currentWeapon.reserveAmmo -=
+            ammoToLoad;
 
         isReloading = false;
 
         updateHUD();
-    }, reloadTime);
+    }, currentWeapon.reloadTime);
 }
 
 function animateReload() {
     if (!weapon) return;
 
-    const originalRotation =
+    const originalRotationZ =
         weapon.rotation.z;
 
+    const originalPositionY =
+        weapon.position.y;
+
     weapon.rotation.z = 0.7;
+    weapon.position.y = -0.15;
+
+    const currentWeapon =
+        getCurrentWeapon();
 
     setTimeout(() => {
         weapon.rotation.z =
-            originalRotation;
-    }, reloadTime);
-}
+            originalRotationZ;
 
+        weapon.position.y =
+            originalPositionY;
+    }, currentWeapon.reloadTime);
+}
 function applyRecoil() {
-    pitch += 0.025;
+    const currentWeapon =
+        getCurrentWeapon();
+
+    pitch +=
+        currentWeapon.recoil;
 
     if (weapon) {
         weapon.position.z += 0.08;
@@ -583,10 +694,13 @@ function showHitmarker() {
 }
 
 function updateHUD() {
+    const currentWeapon =
+        getCurrentWeapon();
+
     document.getElementById(
         "ammo"
     ).textContent =
-        `AMMO: ${ammo} / ${reserveAmmo}`;
+        `${currentWeapon.name} | AMMO: ${currentWeapon.ammo} / ${currentWeapon.reserveAmmo}`;
 }
 
 function sendPlayerPosition() {

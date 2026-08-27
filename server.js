@@ -94,7 +94,15 @@ io.on("connection", (socket) => {
                 return;
             }
 
-            const damage = 25;
+           let damage = 25;
+
+if (data.weapon === "heavyPistol") {
+    damage = 50;
+}
+
+if (data.weapon === "pistol") {
+    damage = 25;
+}
 
             target.health -= damage;
 
