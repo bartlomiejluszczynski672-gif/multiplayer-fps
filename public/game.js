@@ -118,54 +118,310 @@ function createLighting() {
 }
 
 function createMap() {
-    const groundGeometry = new THREE.BoxGeometry(
-        100,
-        1,
-        100
-    );
+    // =========================
+    // GRASS GROUND
+    // =========================
 
-    const groundMaterial = new THREE.MeshStandardMaterial({
-        color: 0x444444
-    });
+    const groundGeometry =
+        new THREE.BoxGeometry(
+            100,
+            1,
+            100
+        );
 
-    const ground = new THREE.Mesh(
-        groundGeometry,
-        groundMaterial
-    );
+    const groundMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x4f7d3a,
+            roughness: 1
+        });
+
+    const ground =
+        new THREE.Mesh(
+            groundGeometry,
+            groundMaterial
+        );
 
     ground.position.y = -0.5;
 
     scene.add(ground);
 
-    createBox(0, 2, -15, 12, 4, 4);
-    createBox(-15, 2, -5, 4, 4, 12);
-    createBox(15, 2, -5, 4, 4, 12);
 
-    createBox(-10, 1.5, 10, 6, 3, 6);
-    createBox(10, 1.5, 10, 6, 3, 6);
+    // =========================
+    // OUTER WALLS / MAP BORDER
+    // =========================
 
-    createBox(0, 1, 20, 20, 2, 4);
+    createBox(
+        0, 2, -48,
+        96, 4, 2,
+        0x5e5e5e
+    );
 
-    createBox(-5, 0.75, 0, 3, 1.5, 3);
-    createBox(5, 0.75, 0, 3, 1.5, 3);
+    createBox(
+        0, 2, 48,
+        96, 4, 2,
+        0x5e5e5e
+    );
+
+    createBox(
+        -48, 2, 0,
+        2, 4, 96,
+        0x5e5e5e
+    );
+
+    createBox(
+        48, 2, 0,
+        2, 4, 96,
+        0x5e5e5e
+    );
+
+
+    // =========================
+    // CENTRAL BUILDING
+    // =========================
+
+    createBox(
+        0, 2.5, -10,
+        18, 5, 10,
+        0x777777
+    );
+
+    createBox(
+        -10, 2, -10,
+        2, 4, 18,
+        0x555555
+    );
+
+    createBox(
+        10, 2, -10,
+        2, 4, 18,
+        0x555555
+    );
+
+
+    // =========================
+    // LEFT SIDE
+    // =========================
+
+    createBox(
+        -25, 2, 0,
+        10, 4, 12,
+        0x6f6f6f
+    );
+
+    createBox(
+        -28, 1, 14,
+        6, 2, 6,
+        0x765437
+    );
+
+    createBox(
+        -18, 1, 18,
+        5, 2, 5,
+        0x765437
+    );
+
+
+    // =========================
+    // RIGHT SIDE
+    // =========================
+
+    createBox(
+        25, 2, 0,
+        10, 4, 12,
+        0x6f6f6f
+    );
+
+    createBox(
+        28, 1, 14,
+        6, 2, 6,
+        0x765437
+    );
+
+    createBox(
+        18, 1, 18,
+        5, 2, 5,
+        0x765437
+    );
+
+
+    // =========================
+    // MIDDLE COVER
+    // =========================
+
+    createBox(
+        -8, 0.8, 5,
+        4, 1.6, 4,
+        0x765437
+    );
+
+    createBox(
+        8, 0.8, 5,
+        4, 1.6, 4,
+        0x765437
+    );
+
+    createBox(
+        0, 0.8, 14,
+        5, 1.6, 5,
+        0x765437
+    );
+
+
+    // =========================
+    // STONE WALLS
+    // =========================
+
+    createBox(
+        -15, 1.25, -25,
+        12, 2.5, 2,
+        0x808080
+    );
+
+    createBox(
+        15, 1.25, -25,
+        12, 2.5, 2,
+        0x808080
+    );
+
+
+    // =========================
+    // SMALL BUNKER
+    // =========================
+
+    createBox(
+        0, 1.5, 30,
+        14, 3, 6,
+        0x555555
+    );
+
+
+    // =========================
+    // TREES
+    // =========================
+
+    createTree(
+        -35,
+        -30
+    );
+
+    createTree(
+        35,
+        -30
+    );
+
+    createTree(
+        -35,
+        30
+    );
+
+    createTree(
+        35,
+        30
+    );
+
+    createTree(
+        -20,
+        30
+    );
+
+    createTree(
+        20,
+        30
+    );
 }
-
 function createBox(
     x,
     y,
     z,
     width,
     height,
-    depth
+    depth,
+    color = 0x777777
 ) {
+    function createTree(
+    x,
+    z
+) {
+    // TRUNK
+    const trunkGeometry =
+        new THREE.CylinderGeometry(
+            0.45,
+            0.6,
+            4,
+            8
+        );
+
+    const trunkMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x6b4423,
+            roughness: 1
+        });
+
+    const trunk =
+        new THREE.Mesh(
+            trunkGeometry,
+            trunkMaterial
+        );
+
+    trunk.position.set(
+        x,
+        2,
+        z
+    );
+
+    scene.add(trunk);
+
+    trunk.updateMatrixWorld(true);
+
+    const trunkCollider =
+        new THREE.Box3()
+            .setFromObject(
+                trunk
+            );
+
+    colliders.push(
+        trunkCollider
+    );
+
+
+    // TREE TOP
+    const leavesGeometry =
+        new THREE.SphereGeometry(
+            2.2,
+            10,
+            8
+        );
+
+    const leavesMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x2f6b32,
+            roughness: 1
+        });
+
+    const leaves =
+        new THREE.Mesh(
+            leavesGeometry,
+            leavesMaterial
+        );
+
+    leaves.position.set(
+        x,
+        5,
+        z
+    );
+
+    scene.add(leaves);
+}
     const geometry = new THREE.BoxGeometry(
         width,
         height,
         depth
     );
 
-    const material = new THREE.MeshStandardMaterial({
-        color: 0x777777
+    const material =
+    new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.9
     });
 
     const box = new THREE.Mesh(
@@ -190,7 +446,72 @@ colliders.push(boxCollider);
 
 return box;
 }
+function createTree(x, z) {
+    const trunkGeometry =
+        new THREE.CylinderGeometry(
+            0.45,
+            0.6,
+            4,
+            8
+        );
 
+    const trunkMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x6b4423,
+            roughness: 1
+        });
+
+    const trunk =
+        new THREE.Mesh(
+            trunkGeometry,
+            trunkMaterial
+        );
+
+    trunk.position.set(
+        x,
+        2,
+        z
+    );
+
+    scene.add(trunk);
+
+    trunk.updateMatrixWorld(true);
+
+    const trunkCollider =
+        new THREE.Box3()
+            .setFromObject(trunk);
+
+    colliders.push(
+        trunkCollider
+    );
+
+    const leavesGeometry =
+        new THREE.SphereGeometry(
+            2.2,
+            10,
+            8
+        );
+
+    const leavesMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x2f6b32,
+            roughness: 1
+        });
+
+    const leaves =
+        new THREE.Mesh(
+            leavesGeometry,
+            leavesMaterial
+        );
+
+    leaves.position.set(
+        x,
+        5,
+        z
+    );
+
+    scene.add(leaves);
+}
 function createPlayer() {
     const geometry = new THREE.BoxGeometry(
         0.8,
