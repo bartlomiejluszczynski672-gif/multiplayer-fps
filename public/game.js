@@ -13,7 +13,7 @@ let pitch = 0;
 
 const keys = {};
 const otherPlayers = {};
-
+const colliders = [];
 const playerSpeed = 0.12;
 
 let lastNetworkUpdate = 0;
@@ -181,7 +181,14 @@ function createBox(
 
     scene.add(box);
 
-    return box;
+box.updateMatrixWorld(true);
+
+const boxCollider =
+    new THREE.Box3().setFromObject(box);
+
+colliders.push(boxCollider);
+
+return box;
 }
 
 function createPlayer() {
@@ -522,7 +529,50 @@ if (event.code === "Digit2") {
         }
     );
 }
+function canPlayerMoveTo(
+    newX,
+    newZ
+) {
+    const mapLimit = 48;
 
+if (
+    newX < -mapLimit ||
+    newX > mapLimit ||
+    newZ < -mapLimit ||
+    newZ > mapLimit
+) {
+    return false;
+}
+    const playerRadius = 0.35;
+
+    const playerBox =
+        new THREE.Box3(
+            new THREE.Vector3(
+                newX - playerRadius,
+                0,
+                newZ - playerRadius
+            ),
+            new THREE.Vector3(
+                newX + playerRadius,
+                1.8,
+                newZ + playerRadius
+            )
+        );
+
+    for (
+        const collider of colliders
+    ) {
+        if (
+            playerBox.intersectsBox(
+                collider
+            )
+        ) {
+            return false;
+        }
+    }
+
+    return true;
+}
 function updateMovement() {
     if (!player) return;
     if (isDead) return;
@@ -553,11 +603,37 @@ function updateMovement() {
             yaw
         );
 
-        player.position.addScaledVector(
-            direction,
-            playerSpeed
-        );
-        weaponBobTime += 0.12;
+        const moveX =
+    direction.x * playerSpeed;
+
+const moveZ =
+    direction.z * playerSpeed;
+
+const newX =
+    player.position.x + moveX;
+
+const newZ =
+    player.position.z + moveZ;
+
+if (
+    canPlayerMoveTo(
+        newX,
+        player.position.z
+    )
+) {
+    player.position.x =
+        newX;
+}
+
+if (
+    canPlayerMoveTo(
+        player.position.x,
+        newZ
+    )
+) {
+    player.position.z =
+        newZ;
+}
     }
     if (
     weapon &&
