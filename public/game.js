@@ -17,7 +17,7 @@ const otherPlayers = {};
 const playerSpeed = 0.12;
 
 let lastNetworkUpdate = 0;
-
+let weaponBobTime = 0;
 let kills = 0;
 let deaths = 0;
 let isDead = false;
@@ -220,51 +220,169 @@ function getCurrentWeapon() {
 function createWeapon() {
     weapon = new THREE.Group();
 
-    const bodyGeometry = new THREE.BoxGeometry(
-        0.22,
-        0.18,
-        0.6
-    );
+    // SLIDE / UPPER PART
+    const slideGeometry =
+        new THREE.BoxGeometry(
+            0.22,
+            0.16,
+            0.62
+        );
 
-    const bodyMaterial = new THREE.MeshStandardMaterial({
-        color: 0x222222
-    });
+    const slideMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x202020,
+            metalness: 0.4,
+            roughness: 0.5
+        });
 
-    const body = new THREE.Mesh(
-        bodyGeometry,
-        bodyMaterial
-    );
+    const slide =
+        new THREE.Mesh(
+            slideGeometry,
+            slideMaterial
+        );
 
-    body.position.set(
+    slide.position.set(
         0.28,
         -0.22,
-        -0.6
+        -0.65
     );
 
-    weapon.add(body);
+    weapon.add(slide);
 
-    const barrelGeometry = new THREE.BoxGeometry(
-        0.08,
-        0.08,
-        0.35
-    );
+    // BARREL
+    const barrelGeometry =
+        new THREE.BoxGeometry(
+            0.09,
+            0.09,
+            0.38
+        );
 
-    const barrelMaterial = new THREE.MeshStandardMaterial({
-        color: 0x111111
-    });
+    const barrelMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x111111,
+            metalness: 0.6,
+            roughness: 0.4
+        });
 
-    const barrel = new THREE.Mesh(
-        barrelGeometry,
-        barrelMaterial
-    );
+    const barrel =
+        new THREE.Mesh(
+            barrelGeometry,
+            barrelMaterial
+        );
 
     barrel.position.set(
         0.28,
-        -0.18,
-        -0.95
+        -0.20,
+        -1.0
     );
 
     weapon.add(barrel);
+
+    // GRIP
+    const gripGeometry =
+        new THREE.BoxGeometry(
+            0.16,
+            0.38,
+            0.18
+        );
+
+    const gripMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x151515,
+            roughness: 0.8
+        });
+
+    const grip =
+        new THREE.Mesh(
+            gripGeometry,
+            gripMaterial
+        );
+
+    grip.position.set(
+        0.28,
+        -0.43,
+        -0.52
+    );
+
+    grip.rotation.x =
+        -0.18;
+
+    weapon.add(grip);
+
+    // TRIGGER GUARD
+    const guardGeometry =
+        new THREE.BoxGeometry(
+            0.16,
+            0.07,
+            0.12
+        );
+
+    const guard =
+        new THREE.Mesh(
+            guardGeometry,
+            slideMaterial
+        );
+
+    guard.position.set(
+        0.28,
+        -0.33,
+        -0.67
+    );
+
+    weapon.add(guard);
+
+    // FRONT SIGHT
+    const sightGeometry =
+        new THREE.BoxGeometry(
+            0.04,
+            0.05,
+            0.04
+        );
+
+    const sight =
+        new THREE.Mesh(
+            sightGeometry,
+            slideMaterial
+        );
+
+    sight.position.set(
+        0.28,
+        -0.11,
+        -0.91
+    );
+
+    weapon.add(sight);
+
+    // HAND
+    const handGeometry =
+        new THREE.BoxGeometry(
+            0.20,
+            0.28,
+            0.22
+        );
+
+    const handMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0xc58f6a,
+            roughness: 0.9
+        });
+
+    const hand =
+        new THREE.Mesh(
+            handGeometry,
+            handMaterial
+        );
+
+    hand.position.set(
+        0.28,
+        -0.55,
+        -0.48
+    );
+
+    hand.rotation.x =
+        -0.12;
+
+    weapon.add(hand);
 
     camera.add(weapon);
     scene.add(camera);
@@ -272,36 +390,47 @@ function createWeapon() {
 function updateWeaponModel() {
     if (!weapon) return;
 
-    weapon.rotation.set(0, 0, 0);
-    weapon.position.set(0, 0, 0);
-    weapon.scale.set(1, 1, 1);
+    weapon.rotation.set(
+        0,
+        0,
+        0
+    );
 
-    if (currentWeaponKey === "pistol") {
+    weapon.position.set(
+        0,
+        0,
+        0
+    );
+
+    weapon.scale.set(
+        1,
+        1,
+        1
+    );
+
+    if (
+        currentWeaponKey ===
+        "pistol"
+    ) {
         weapon.scale.set(
             1,
             1,
             1
         );
-
-        weapon.position.set(
-            0,
-            0,
-            0
-        );
     }
 
-    if (currentWeaponKey === "heavyPistol") {
+    if (
+        currentWeaponKey ===
+        "heavyPistol"
+    ) {
         weapon.scale.set(
-            1.35,
+            1.3,
             1.2,
-            1.3
+            1.35
         );
 
-        weapon.position.set(
-            0.03,
-            -0.03,
-            0.02
-        );
+        weapon.rotation.z =
+            -0.03;
     }
 }
 function setupControls() {
@@ -428,7 +557,32 @@ function updateMovement() {
             direction,
             playerSpeed
         );
+        weaponBobTime += 0.12;
     }
+    if (
+    weapon &&
+    !isReloading
+) {
+    const isMoving =
+        direction.length() > 0;
+
+    if (isMoving) {
+        weapon.position.x =
+            Math.sin(
+                weaponBobTime
+            ) * 0.015;
+
+        weapon.position.y =
+            Math.abs(
+                Math.cos(
+                    weaponBobTime
+                )
+            ) * 0.012;
+    } else {
+        weapon.position.x *= 0.85;
+        weapon.position.y *= 0.85;
+    }
+}
 
     player.rotation.y = yaw;
 
@@ -608,13 +762,17 @@ function applyRecoil() {
     pitch +=
         currentWeapon.recoil;
 
-    if (weapon) {
-        weapon.position.z += 0.08;
+    if (!weapon) return;
 
-        setTimeout(() => {
-            weapon.position.z -= 0.08;
-        }, 80);
-    }
+    weapon.position.z += 0.10;
+    weapon.rotation.x -= 0.08;
+
+    setTimeout(() => {
+        if (!weapon) return;
+
+        weapon.position.z -= 0.10;
+        weapon.rotation.x += 0.08;
+    }, 70);
 }
 
 function createMuzzleFlash() {
