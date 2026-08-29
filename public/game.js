@@ -843,102 +843,93 @@ function updateWeaponModel() {
     }
 }
 function setupControls() {
-    document.addEventListener(
-        "keydown",
-        (event) => {
-            keys[event.code] = true;
+    document.addEventListener("keydown", (event) => {
+        keys[event.code] = true;
 
-            if (event.code === "KeyR") {
-                reload();
-            }
-            
-            if (event.code === "Digit1") {
-    switchWeapon("pistol");
-}
-
-if (event.code === "Digit2") {
-    switchWeapon("heavyPistol");
-}
+        if (event.code === "KeyR") {
+            reload();
         }
-    );
 
-    document.addEventListener(
-        "keyup",
-        (event) => {
-            keys[event.code] = false;
+        if (event.code === "Digit1") {
+            switchWeapon("pistol");
         }
-    );
 
-    document.addEventListener(
-        "mousemove",
-        (event) => {
-            if (
-                document.pointerLockElement !==
-                document.body
-            ) {
-                return;
-            }
+        if (event.code === "Digit2") {
+            switchWeapon("heavyPistol");
+        }
+    });
 
-            yaw -= event.movementX * 0.002;
-            pitch -= event.movementY * 0.002;
+    document.addEventListener("keyup", (event) => {
+        keys[event.code] = false;
+    });
 
-            pitch = Math.max(
-                -Math.PI / 2,
-                Math.min(
-                    Math.PI / 2,
-                    pitch
-                )
+    document.addEventListener("mousemove", (event) => {
+        if (document.pointerLockElement !== document.body) {
+            return;
+        }
+
+        yaw -= event.movementX * 0.002;
+        pitch -= event.movementY * 0.002;
+
+        pitch = Math.max(
+            -Math.PI / 2,
+            Math.min(Math.PI / 2, pitch)
+        );
+    });
+
+    document.addEventListener("mousedown", (event) => {
+        if (
+            event.button === 0 &&
+            document.pointerLockElement === document.body
+        ) {
+            shoot();
+        }
+    });
+
+    const mapButtons =
+        document.querySelectorAll(".mapButton");
+
+    mapButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            currentMap = button.dataset.map;
+
+            socket.emit("selectMap", currentMap);
+
+            mapButtons.forEach((otherButton) => {
+                otherButton.classList.remove("selected");
+            });
+
+            button.classList.add("selected");
+
+            console.log(
+                "Selected map:",
+                currentMap
             );
-        }
-    );
+        });
+    });
 
-    document.addEventListener(
-        "mousedown",
-        (event) => {
-            if (
-                event.button === 0 &&
-                document.pointerLockElement === document.body
-            ) {
-                shoot();
-            }
-        }
-    );
-const mapButtons = document.querySelectorAll(".mapButton");
+    document
+        .getElementById("startButton")
+        .addEventListener("click", () => {
+            createMap();
 
-mapButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-        currentMap = button.dataset.map;
+            document.body.requestPointerLock();
 
-        mapButtons.forEach((otherButton) => {
-            otherButton.classList.remove("selected");
+            document.getElementById(
+                "startScreen"
+            ).style.display = "none";
         });
 
-        button.classList.add("selected");
+    renderer.domElement.addEventListener("click", () => {
+        if (isDead) return;
 
-        console.log("Selected map:", currentMap);
-    });
-});
-    document.getElementById("startButton").addEventListener("click", () => {
-    createMap();
-
-    document.body.requestPointerLock();
-
-    document.getElementById("startScreen").style.display = "none";
-});
-
-    renderer.domElement.addEventListener(
-        "click",
-        () => {
-            if (isDead) return;
-
-            if (
-                document.pointerLockElement !==
-                document.body
-            ) {
-                document.body.requestPointerLock();
-            }
+        if (
+            document.pointerLockElement !==
+            document.body
+        ) {
+            document.body.requestPointerLock();
         }
-    );
+    });
 }
 function canPlayerMoveTo(
     newX,
