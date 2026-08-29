@@ -22,6 +22,7 @@ const spawnPoints = [
     { x: 20, y: 0.9, z: 0 }
 ];
 const colliders = [];
+let currentMap = "industrial";
 const playerSpeed = 0.12;
 
 let lastNetworkUpdate = 0;
@@ -126,6 +127,16 @@ function createLighting() {
 }
 
 function createMap() {
+    if (currentMap === "grass") {
+        createGrassMap();
+    }
+
+    if (currentMap === "industrial") {
+        createIndustrialMap();
+    }
+}
+
+function createGrassMap() {
     // =========================
     // GRASS GROUND
     // =========================
@@ -337,14 +348,75 @@ function createMap() {
         30
     );
 }
+function createIndustrialMap() {
+    // CONCRETE GROUND
+    const groundGeometry = new THREE.BoxGeometry(100, 1, 100);
+
+    const groundMaterial = new THREE.MeshStandardMaterial({
+        color: 0x55575a,
+        roughness: 0.95,
+        metalness: 0.05
+    });
+
+    const ground = new THREE.Mesh(
+        groundGeometry,
+        groundMaterial
+    );
+
+    ground.position.y = -0.5;
+    scene.add(ground);
+
+    // OUTER WALLS
+    createBox(0, 3, -48, 96, 6, 2, 0x3f4144);
+    createBox(0, 3, 48, 96, 6, 2, 0x3f4144);
+    createBox(-48, 3, 0, 2, 6, 96, 0x3f4144);
+    createBox(48, 3, 0, 2, 6, 96, 0x3f4144);
+
+    // LARGE WAREHOUSE
+    createBox(
+    0, 4, -24,
+    32, 8, 16,
+    0x66696d,
+);
+
+    // SIDE BUILDINGS
+    createBox(-30, 3, 5, 14, 6, 22, 0x5f6266);
+    createBox(30, 3, 5, 14, 6, 22, 0x5f6266);
+
+    // CENTER WALLS
+    createBox(-10, 1.6, -2, 2, 3.2, 16, 0x44484c);
+    createBox(10, 1.6, -2, 2, 3.2, 16, 0x44484c);
+
+    // RED CONTAINERS
+    createBox(-18, 1.4, 22, 10, 2.8, 4, 0x8a3434);
+    createBox(-18, 1.4, 28, 10, 2.8, 4, 0x8a3434);
+
+    // BLUE CONTAINERS
+    createBox(18, 1.4, 22, 10, 2.8, 4, 0x345c7d);
+    createBox(18, 1.4, 28, 10, 2.8, 4, 0x345c7d);
+
+    // CENTER COVER
+createBox(0, 1, 16, 6, 2, 6, 0x4d4f52);
+createBox(-8, 1, 20, 4, 2, 4, 0x4d4f52);
+createBox(8, 1, 20, 4, 2, 4, 0x4d4f52);
+
+    // METAL BARRIERS
+    createBox(-25, 1.1, -12, 12, 2.2, 1, 0x777b80);
+    createBox(25, 1.1, -12, 12, 2.2, 1, 0x777b80);
+
+    // STORAGE BLOCKS
+    createBox(-6, 1.2, 32, 5, 2.4, 5, 0x686868);
+    createBox(6, 1.2, 32, 5, 2.4, 5, 0x686868);
+
+    // FACTORY TOWERS
+    createBox(-40, 4, -18, 6, 8, 6, 0x56595c);
+createBox(40, 4, -18, 6, 8, 6, 0x56595c);
+}
 function createBox(
-    x,
-    y,
-    z,
-    width,
-    height,
-    depth,
-    color = 0x777777
+    x, y, z,
+    width, height, depth,
+    color = 0x777777,
+    hasCollision = true
 ) {
     function createTree(
     x,
@@ -447,10 +519,12 @@ function createBox(
 
 box.updateMatrixWorld(true);
 
-const boxCollider =
-    new THREE.Box3().setFromObject(box);
+if (hasCollision) {
+    const boxCollider =
+        new THREE.Box3().setFromObject(box);
 
-colliders.push(boxCollider);
+    colliders.push(boxCollider);
+}
 
 return box;
 }
@@ -888,17 +962,9 @@ if (
             )
         );
 
-    for (
-        const collider of colliders
-    ) {
-        if (
-            playerBox.intersectsBox(
-                collider
-            )
-        ) {
-            return false;
-        }
-    }
+    for (const collider of colliders) {
+    if (playerBox.intersectsBox(collider)) return false;
+}
 
     return true;
 }
