@@ -22,7 +22,7 @@ const spawnPoints = [
     { x: 20, y: 0.9, z: 0 }
 ];
 const colliders = [];
-let currentMap = "industrial";
+let currentMap = "grass";
 const playerSpeed = 0.12;
 
 let lastNetworkUpdate = 0;
@@ -90,7 +90,6 @@ function init() {
     document.body.appendChild(renderer.domElement);
 
     createLighting();
-    createMap();
     createPlayer();
     createWeapon();
     setupControls();
@@ -904,19 +903,28 @@ if (event.code === "Digit2") {
             }
         }
     );
+const mapButtons = document.querySelectorAll(".mapButton");
 
-    document
-        .getElementById("startButton")
-        .addEventListener(
-            "click",
-            () => {
-                document.body.requestPointerLock();
+mapButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        currentMap = button.dataset.map;
 
-                document
-                    .getElementById("startScreen")
-                    .style.display = "none";
-            }
-        );
+        mapButtons.forEach((otherButton) => {
+            otherButton.classList.remove("selected");
+        });
+
+        button.classList.add("selected");
+
+        console.log("Selected map:", currentMap);
+    });
+});
+    document.getElementById("startButton").addEventListener("click", () => {
+    createMap();
+
+    document.body.requestPointerLock();
+
+    document.getElementById("startScreen").style.display = "none";
+});
 
     renderer.domElement.addEventListener(
         "click",

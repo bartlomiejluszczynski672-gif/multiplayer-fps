@@ -213,3 +213,26 @@ canvas {
 #deathScreen p {
     font-size: 24px;
 }
+#mapSelection {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.mapButton {
+    padding: 14px 24px;
+    font-size: 18px;
+    border: 2px solid white;
+    background: #222;
+    color: white;
+    cursor: pointer;
+}
+
+.mapButton:hover {
+    background: #333;
+}
+
+.mapButton.selected {
+    background: #ffffff;
+    color: #111111;
+}
