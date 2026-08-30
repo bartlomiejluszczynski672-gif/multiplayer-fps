@@ -16,6 +16,7 @@ app.use(
 );
 
 const players = {};
+let selectedMap = "grass";
 const spawnPoints = [
     { x: -35, y: 0.9, z: -35 },
     { x: 35, y: 0.9, z: -35 },
@@ -33,10 +34,36 @@ function getRandomSpawnPoint() {
     ];
 }
 io.on("connection", (socket) => {
-    console.log(
-        "Player connected:",
-        socket.id
-    );
+    console.log("Player connected:", socket.id);
+
+    socket.emit("mapSelected", selectedMap);
+
+    // inne eventy...
+
+        socket.on("selectMap", (mapName) => {
+        if (
+            mapName !== "grass" &&
+            mapName !== "industrial"
+        ) {
+            return;
+        }
+
+        selectedMap = mapName;
+
+        io.emit("mapSelected", selectedMap);
+
+        console.log("Map selected:", selectedMap);
+    });
+
+
+    socket.on("disconnect", () => {
+        console.log("Player disconnected:", socket.id);
+
+        delete players[socket.id];
+
+        io.emit("playerLeft", socket.id);
+    });
+});
 const spawn =
     getRandomSpawnPoint();
     players[socket.id] = {
@@ -50,9 +77,6 @@ const spawn =
     deaths: 0,
     dead: false
 };
-
-io.emit("lobbyPlayers", players);
-
     socket.emit(
         "currentPlayers",
         players
@@ -237,7 +261,20 @@ target.z =
             }
         }
     );
+socket.on("selectMap", (mapName) => {
+    if (
+        mapName !== "grass" &&
+        mapName !== "industrial"
+    ) {
+        return;
+    }
 
+    selectedMap = mapName;
+
+    io.emit("mapSelected", selectedMap);
+
+    console.log("Map selected:", selectedMap);
+});
     socket.on(
         "disconnect",
         () => {
@@ -250,15 +287,13 @@ target.z =
                 socket.id
             ];
 
-            io.emit("lobbyPlayers", players);
-            
             io.emit(
                 "playerLeft",
                 socket.id
             );
         }
     );
-});
+
 
 server.listen(
     PORT,

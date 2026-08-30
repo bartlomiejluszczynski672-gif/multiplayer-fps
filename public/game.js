@@ -1435,7 +1435,34 @@ socket.on(
         }
     }
 );
+socket.on("lobbyPlayers", (players) => {
+    const playerList =
+        document.getElementById("playerList");
 
+    if (!playerList) return;
+
+    playerList.innerHTML = "";
+
+    Object.values(players).forEach((playerData) => {
+        const playerElement =
+            document.createElement("div");
+
+        playerElement.className =
+            "lobbyPlayer";
+
+        if (playerData.id === socket.id) {
+            playerElement.textContent =
+                "YOU";
+        } else {
+            playerElement.textContent =
+                "PLAYER";
+        }
+
+        playerList.appendChild(
+            playerElement
+        );
+    });
+});
 function createOtherPlayer(
     playerData
 ) {
