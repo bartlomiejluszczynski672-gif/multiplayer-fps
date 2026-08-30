@@ -30,6 +30,7 @@ let weaponBobTime = 0;
 let kills = 0;
 let deaths = 0;
 let isDead = false;
+let currentHostId = null;
 
 // WEAPON SYSTEM
 const weapons = {
@@ -1435,7 +1436,13 @@ socket.on(
         }
     }
 );
+
 socket.on("lobbyPlayers", (players) => {
+    latestLobbyPlayers = players;
+    updateLobbyPlayerList();
+});
+let latestLobbyPlayers = {};
+function updateLobbyPlayerList() {
     const playerList =
         document.getElementById("playerList");
 
@@ -1443,25 +1450,43 @@ socket.on("lobbyPlayers", (players) => {
 
     playerList.innerHTML = "";
 
-    Object.values(players).forEach((playerData) => {
+    console.log("MY SOCKET:", socket.id);
+    console.log("CURRENT HOST:", currentHostId);
+    console.log("PLAYERS:", latestLobbyPlayers);
+
+    Object.values(latestLobbyPlayers).forEach((playerData) => {
         const playerElement =
             document.createElement("div");
 
         playerElement.className =
             "lobbyPlayer";
 
+        let playerText = "";
+
         if (playerData.id === socket.id) {
-            playerElement.textContent =
-                "YOU";
+            playerText = "YOU";
         } else {
-            playerElement.textContent =
-                "PLAYER";
+            playerText = "PLAYER";
         }
+
+        if (playerData.id === currentHostId) {
+            playerText += " 👑 HOST";
+        }
+
+        playerElement.textContent =
+            playerText;
 
         playerList.appendChild(
             playerElement
         );
     });
+}
+socket.on("hostChanged", (hostId) => {
+    console.log("RECEIVED HOST:", hostId);
+
+    currentHostId = hostId;
+
+    updateLobbyPlayerList();
 });
 function createOtherPlayer(
     playerData

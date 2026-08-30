@@ -16,6 +16,7 @@ app.use(
 );
 
 const players = {};
+let hostId = null;
 const spawnPoints = [
     { x: -35, y: 0.9, z: -35 },
     { x: 35, y: 0.9, z: -35 },
@@ -37,6 +38,10 @@ io.on("connection", (socket) => {
         "Player connected:",
         socket.id
     );
+    if (hostId === null) {
+    hostId = socket.id;
+    console.log("HOST ID:", hostId);
+}
 const spawn =
     getRandomSpawnPoint();
     players[socket.id] = {
@@ -52,6 +57,9 @@ const spawn =
 };
 
 io.emit("lobbyPlayers", players);
+
+io.emit("hostChanged", hostId);
+console.log("SENDING HOST:", hostId);
 
     socket.emit(
         "currentPlayers",
@@ -250,8 +258,20 @@ target.z =
                 socket.id
             ];
 
+            if (socket.id === hostId) {
+    const remainingPlayers = Object.keys(players);
+
+    if (remainingPlayers.length > 0) {
+        hostId = remainingPlayers[0];
+    } else {
+        hostId = null;
+    }
+
+    io.emit("hostChanged", hostId);
+}
+
             io.emit("lobbyPlayers", players);
-            
+
             io.emit(
                 "playerLeft",
                 socket.id
