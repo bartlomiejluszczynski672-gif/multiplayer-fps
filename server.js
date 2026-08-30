@@ -17,6 +17,7 @@ app.use(
 
 const players = {};
 let hostId = null;
+let selectedMap = "grass";
 const spawnPoints = [
     { x: -35, y: 0.9, z: -35 },
     { x: 35, y: 0.9, z: -35 },
@@ -41,7 +42,44 @@ io.on("connection", (socket) => {
     if (hostId === null) {
     hostId = socket.id;
     console.log("HOST ID:", hostId);
+    socket.emit("mapSelected", selectedMap);
+    socket.on("selectMap", (mapName) => {
+    if (socket.id !== hostId) {
+        return;
+    }
+
+    if (
+        mapName !== "grass" &&
+        mapName !== "industrial"
+    ) {
+        return;
+    }
+
+    selectedMap = mapName;
+
+    io.emit("mapSelected", selectedMap);
+
+    console.log(
+        "Host selected map:",
+        selectedMap
+    );
+});
+socket.on("startGame", () => {
+    if (socket.id !== hostId) {
+        return;
+    }
+
+    io.emit("gameStarted", {
+        map: selectedMap
+    });
+
+    console.log(
+        "Game started on:",
+        selectedMap
+    );
+});
 }
+
 const spawn =
     getRandomSpawnPoint();
     players[socket.id] = {

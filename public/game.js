@@ -891,35 +891,29 @@ function setupControls() {
         document.querySelectorAll(".mapButton");
 
     mapButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            currentMap = button.dataset.map;
+    button.addEventListener("click", () => {
+        if (socket.id !== currentHostId) {
+            return;
+        }
 
-            socket.emit("selectMap", currentMap);
-
-            mapButtons.forEach((otherButton) => {
-                otherButton.classList.remove("selected");
-            });
-
-            button.classList.add("selected");
-
-            console.log(
-                "Selected map:",
-                currentMap
-            );
-        });
+        socket.emit(
+            "selectMap",
+            button.dataset.map
+        );
     });
+});
 
     document
-        .getElementById("startButton")
-        .addEventListener("click", () => {
-            createMap();
+    .getElementById("startButton")
+    .addEventListener("click", () => {
+        if (socket.id !== currentHostId) {
+            return;
+        }
 
-            document.body.requestPointerLock();
+        document.body.requestPointerLock();
 
-            document.getElementById(
-                "startScreen"
-            ).style.display = "none";
-        });
+        socket.emit("startGame");
+    });
 
     renderer.domElement.addEventListener("click", () => {
         if (isDead) return;
@@ -1482,12 +1476,70 @@ function updateLobbyPlayerList() {
     });
 }
 socket.on("hostChanged", (hostId) => {
-    console.log("RECEIVED HOST:", hostId);
-
     currentHostId = hostId;
 
     updateLobbyPlayerList();
+    updateHostControls();
+    socket.on("mapSelected", (mapName) => {
+    currentMap = mapName;
+
+    const mapButtons =
+        document.querySelectorAll(".mapButton");
+
+    mapButtons.forEach((button) => {
+        if (button.dataset.map === currentMap) {
+            button.classList.add("selected");
+        } else {
+            button.classList.remove("selected");
+        }
+    });
+
+    console.log(
+        "Lobby map:",
+        currentMap
+    );
+    socket.on("gameStarted", (data) => {
+    currentMap = data.map;
+
+    createMap();
+
+    document.getElementById(
+        "startScreen"
+    ).style.display = "none";
+
+    console.log(
+        "Game started:",
+        currentMap
+    );
 });
+});
+});
+function updateHostControls() {
+    const mapButtons =
+        document.querySelectorAll(".mapButton");
+
+    const startButton =
+        document.getElementById("startButton");
+
+    const isHost =
+        socket.id === currentHostId;
+
+    mapButtons.forEach((button) => {
+        button.disabled = !isHost;
+    });
+
+    if (startButton) {
+        startButton.disabled = !isHost;
+
+        if (isHost) {
+            startButton.textContent =
+                "START GAME";
+        } else {
+            startButton.textContent =
+                "WAITING FOR HOST...";
+        }
+    }
+}
 function createOtherPlayer(
     playerData
 ) {

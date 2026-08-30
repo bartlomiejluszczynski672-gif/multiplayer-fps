@@ -266,3 +266,12 @@ canvas {
 
     text-align: left;
 }
+.mapButton:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+#startButton:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
