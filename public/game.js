@@ -2245,6 +2245,30 @@ function updateOtherPlayer(
 
     if (!mesh) return;
 
+    const oldX =
+        mesh.position.x;
+
+    const oldZ =
+        mesh.position.z;
+
+    const newX =
+        playerData.x;
+
+    const newZ =
+        playerData.z;
+
+    const deltaX =
+        newX - oldX;
+
+    const deltaZ =
+        newZ - oldZ;
+
+    const moveDistance =
+        Math.sqrt(
+            deltaX * deltaX +
+            deltaZ * deltaZ
+        );
+
     mesh.position.set(
         playerData.x,
         playerData.y,
@@ -2254,175 +2278,76 @@ function updateOtherPlayer(
     mesh.rotation.y =
         playerData.rotationY ||
         0;
+
+    const leftArm =
+        mesh.userData.leftArm;
+
+    const rightArm =
+        mesh.userData.rightArm;
+
+    const leftLeg =
+        mesh.userData.leftLeg;
+
+    const rightLeg =
+        mesh.userData.rightLeg;
+
+    if (
+        !leftArm ||
+        !rightArm ||
+        !leftLeg ||
+        !rightLeg
+    ) {
+        return;
+    }
+
+    if (
+        mesh.userData.walkTime ===
+        undefined
+    ) {
+        mesh.userData.walkTime = 0;
+    }
+
+    const isMoving =
+        moveDistance > 0.001;
+
+    if (isMoving) {
+        mesh.userData.walkTime +=
+            moveDistance * 8;
+
+        const walk =
+            Math.sin(
+                mesh.userData.walkTime
+            );
+
+        leftLeg.rotation.x =
+            walk * 0.65;
+
+        rightLeg.rotation.x =
+            -walk * 0.65;
+
+        leftArm.rotation.x =
+            -walk * 0.35;
+
+        rightArm.rotation.x =
+            walk * 0.35;
+    } else {
+        leftLeg.rotation.x *=
+            0.75;
+
+        rightLeg.rotation.x *=
+            0.75;
+
+        leftArm.rotation.x *=
+            0.75;
+
+        rightArm.rotation.x *=
+            0.75;
+    }
 }
-
-socket.on(
-    "playerHealth",
-    (data) => {
-        document.getElementById(
-            "health"
-        ).textContent =
-            `HP: ${data.health}`;
-    }
-);
-
-socket.on(
-    "playerStats",
-    (data) => {
-        kills = data.kills;
-        deaths = data.deaths;
-
-        document.getElementById(
-            "stats"
-        ).textContent =
-            `KILLS: ${kills} | DEATHS: ${deaths}`;
-    }
-);
-
-socket.on(
-    "playerDied",
-    () => {
-        console.log("YOU DIED EVENT RECEIVED");
-
-        isDead = true;
-
-        const deathScreen =
-            document.getElementById(
-                "deathScreen"
-            );
-
-        const respawnText =
-            document.getElementById(
-                "respawnText"
-            );
-
-        if (deathScreen) {
-            deathScreen.style.display =
-                "flex";
-        }
-
-        if (respawnText) {
-            respawnText.textContent =
-                "Respawning in 3...";
-        }
-
-        if (
-            document.pointerLockElement
-        ) {
-            document.exitPointerLock();
-        }
-
-        setTimeout(() => {
-            if (
-                isDead &&
-                respawnText
-            ) {
-                respawnText.textContent =
-                    "Respawning in 2...";
-            }
-        }, 1000);
-
-        setTimeout(() => {
-            if (
-                isDead &&
-                respawnText
-            ) {
-                respawnText.textContent =
-                    "Respawning in 1...";
-            }
-        }, 2000);
-    }
-);
-   
-
-socket.on(
-    "playerRespawn",
-    (data) => {
-        console.log(
-            "RESPAWN EVENT RECEIVED"
-        );
-
-        player.position.set(
-            data.x,
-            data.y,
-            data.z
-        );
-
-        document.getElementById(
-            "health"
-        ).textContent =
-            `HP: ${data.health}`;
-
-        const deathScreen =
-            document.getElementById(
-                "deathScreen"
-            );
-
-        if (deathScreen) {
-            deathScreen.style.display =
-                "none";
-        }
-
-        isDead = false;
-    }
-);
-socket.on(
-    "playerKilled",
-    (data) => {
-        if (
-            data.playerId ===
-            socket.id
-        ) {
-            return;
-        }
-
-        const deadPlayer =
-            otherPlayers[
-                data.playerId
-            ];
-
-        if (deadPlayer) {
-            deadPlayer.visible =
-                false;
-        }
-    }
-);
-
-socket.on(
-    "playerRespawned",
-    (data) => {
-        if (
-            data.playerId ===
-            socket.id
-        ) {
-            return;
-        }
-
-        const respawnedPlayer =
-            otherPlayers[
-                data.playerId
-            ];
-
-        if (
-            respawnedPlayer
-        ) {
-            respawnedPlayer
-                .position
-                .set(
-                    data.x,
-                    data.y,
-                    data.z
-                );
-
-            respawnedPlayer.visible =
-                true;
-        }
-    }
-);
 
 function onResize() {
     camera.aspect =
-        window.innerWidth /
+        window.innerWidth 
         window.innerHeight;
 
     camera.updateProjectionMatrix();
