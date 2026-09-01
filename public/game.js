@@ -1158,7 +1158,7 @@ const currentWeapon = getCurrentWeapon();
 
     const hits = raycaster.intersectObjects(
         targets,
-        false
+        true
     );
 
     if (hits.length > 0) {
@@ -1476,7 +1476,37 @@ socket.on(
 
 socket.on("lobbyPlayers", (players) => {
     latestLobbyPlayers = players;
+
     updateLobbyPlayerList();
+
+    Object.values(players).forEach(
+        (playerData) => {
+            if (
+                playerData.id === socket.id
+            ) {
+                return;
+            }
+
+            const existingPlayer =
+                otherPlayers[playerData.id];
+
+            if (
+                existingPlayer &&
+                existingPlayer.userData.character !==
+                    playerData.character
+            ) {
+                scene.remove(existingPlayer);
+
+                delete otherPlayers[
+                    playerData.id
+                ];
+
+                createOtherPlayer(
+                    playerData
+                );
+            }
+        }
+    );
 });
 let latestLobbyPlayers = {};
 function updateLobbyPlayerList() {
@@ -1684,53 +1714,251 @@ function updateHostControls() {
         }
     }
 }
-function createOtherPlayer(
-    playerData
-) {
-    if (
-        otherPlayers[
-            playerData.id
-        ]
-    ) {
+function createOtherPlayer(playerData) {
+    if (otherPlayers[playerData.id]) {
         return;
     }
 
-    const geometry =
-        new THREE.BoxGeometry(
-            0.8,
-            1.8,
-            0.8
-        );
+    const characterGroup =
+        new THREE.Group();
 
-    const material =
+    const skinMaterial =
         new THREE.MeshStandardMaterial({
-            color: 0xff3333
+            color: 0xd6a77a
         });
 
-    const mesh =
+    const darkMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x202020
+        });
+
+    const soldierMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x40533b
+        });
+
+    const agentMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x1c2230
+        });
+
+    const head =
         new THREE.Mesh(
-            geometry,
-            material
+            new THREE.BoxGeometry(
+                0.42,
+                0.42,
+                0.42
+            ),
+            skinMaterial
         );
 
-    mesh.position.set(
+    head.position.y = 1.55;
+
+    characterGroup.add(head);
+
+    let bodyMaterial;
+
+    if (
+        playerData.character ===
+        "agent"
+    ) {
+        bodyMaterial =
+            agentMaterial;
+    } else {
+        bodyMaterial =
+            soldierMaterial;
+    }
+
+    const body =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                0.65,
+                0.8,
+                0.35
+            ),
+            bodyMaterial
+        );
+
+    body.position.y = 1.05;
+
+    characterGroup.add(body);
+
+    const leftArm =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                0.18,
+                0.75,
+                0.18
+            ),
+            bodyMaterial
+        );
+
+    leftArm.position.set(
+        -0.43,
+        1.05,
+        0
+    );
+
+    characterGroup.add(
+        leftArm
+    );
+
+    const rightArm =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                0.18,
+                0.75,
+                0.18
+            ),
+            bodyMaterial
+        );
+
+    rightArm.position.set(
+        0.43,
+        1.05,
+        0
+    );
+
+    characterGroup.add(
+        rightArm
+    );
+
+    const leftLeg =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                0.22,
+                0.75,
+                0.22
+            ),
+            darkMaterial
+        );
+
+    leftLeg.position.set(
+        -0.18,
+        0.38,
+        0
+    );
+
+    characterGroup.add(
+        leftLeg
+    );
+
+    const rightLeg =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                0.22,
+                0.75,
+                0.22
+            ),
+            darkMaterial
+        );
+
+    rightLeg.position.set(
+        0.18,
+        0.38,
+        0
+    );
+
+    characterGroup.add(
+        rightLeg
+    );
+
+    if (
+        playerData.character ===
+        "soldier"
+    ) {
+        const helmet =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.5,
+                    0.18,
+                    0.5
+                ),
+                soldierMaterial
+            );
+
+        helmet.position.y =
+            1.82;
+
+        characterGroup.add(
+            helmet
+        );
+
+        const vest =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.75,
+                    0.5,
+                    0.45
+                ),
+                darkMaterial
+            );
+
+        vest.position.y =
+            1.05;
+
+        characterGroup.add(
+            vest
+        );
+    }
+
+    if (
+        playerData.character ===
+        "agent"
+    ) {
+        const tie =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.08,
+                    0.4,
+                    0.04
+                ),
+                darkMaterial
+            );
+
+        tie.position.set(
+            0,
+            1.05,
+            0.2
+        );
+
+        characterGroup.add(
+            tie
+        );
+    }
+
+    characterGroup.position.set(
         playerData.x,
-        playerData.y,
+        playerData.y - 0.9,
         playerData.z
     );
 
-    mesh.rotation.y =
+    characterGroup.rotation.y =
         playerData.rotationY ||
         0;
 
-    mesh.userData.playerId =
+    characterGroup.userData.playerId =
         playerData.id;
 
-    scene.add(mesh);
+        characterGroup.userData.character =
+    playerData.character;
+
+    characterGroup.traverse(
+        (object) => {
+            if (object.isMesh) {
+                object.userData.playerId =
+                    playerData.id;
+            }
+        }
+    );
+
+    scene.add(
+        characterGroup
+    );
 
     otherPlayers[
         playerData.id
-    ] = mesh;
+    ] = characterGroup;
 }
 
 function updateOtherPlayer(
