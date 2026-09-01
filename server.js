@@ -79,6 +79,32 @@ io.on("connection", (socket) => {
         );
     });
 
+    socket.on("selectCharacter", (character) => {
+    const player = players[socket.id];
+
+    if (!player) return;
+
+    if (
+        character !== "soldier" &&
+        character !== "agent"
+    ) {
+        return;
+    }
+
+    player.character = character;
+
+    io.emit(
+        "lobbyPlayers",
+        players
+    );
+
+    console.log(
+        "Character selected:",
+        socket.id,
+        character
+    );
+});
+
     socket.on("toggleReady", () => {
     const player = players[socket.id];
 
@@ -112,6 +138,7 @@ const spawn =
     deaths: 0,
     dead: false,
     ready: false,
+    character: "soldier"
 };
 
 io.emit("lobbyPlayers", players);

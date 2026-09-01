@@ -23,6 +23,7 @@ const spawnPoints = [
 ];
 const colliders = [];
 let currentMap = "grass";
+let selectedCharacter = "soldier";
 const playerSpeed = 0.12;
 
 let lastNetworkUpdate = 0;
@@ -886,6 +887,34 @@ function setupControls() {
             shoot();
         }
     });
+const characterButtons =
+    document.querySelectorAll(
+        ".characterButton"
+    );
+
+characterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        selectedCharacter =
+            button.dataset.character;
+
+        socket.emit(
+            "selectCharacter",
+            selectedCharacter
+        );
+
+        characterButtons.forEach(
+            (otherButton) => {
+                otherButton.classList.remove(
+                    "selected"
+                );
+            }
+        );
+
+        button.classList.add(
+            "selected"
+        );
+    });
+});
 
     const mapButtons =
         document.querySelectorAll(".mapButton");
@@ -1486,6 +1515,13 @@ if (
 ) {
     playerText += " ✅ READY";
 }
+if (playerData.character === "soldier") {
+    playerText += " | SOLDIER";
+}
+
+if (playerData.character === "agent") {
+    playerText += " | AGENT";
+}
         playerElement.textContent =
             playerText;
 
@@ -1495,6 +1531,31 @@ if (
     });
     const myPlayer =
     latestLobbyPlayers[socket.id];
+
+if (myPlayer) {
+    selectedCharacter =
+        myPlayer.character;
+
+    const characterButtons =
+        document.querySelectorAll(
+            ".characterButton"
+        );
+
+    characterButtons.forEach((button) => {
+        if (
+            button.dataset.character ===
+            selectedCharacter
+        ) {
+            button.classList.add(
+                "selected"
+            );
+        } else {
+            button.classList.remove(
+                "selected"
+            );
+        }
+    });
+}
 
 const readyButton =
     document.getElementById("readyButton");
