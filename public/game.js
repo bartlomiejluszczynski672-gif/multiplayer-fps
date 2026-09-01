@@ -1729,19 +1729,40 @@ function createOtherPlayer(playerData) {
 
     const darkMaterial =
         new THREE.MeshStandardMaterial({
-            color: 0x202020
+            color: 0x1b1b1b
+        });
+
+    const blackMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x090909
+        });
+
+    const metalMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x444444
         });
 
     const soldierMaterial =
         new THREE.MeshStandardMaterial({
-            color: 0x40533b
+            color: 0x3f5438
+        });
+
+    const soldierDarkMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x263322
         });
 
     const agentMaterial =
         new THREE.MeshStandardMaterial({
-            color: 0x1c2230
+            color: 0x202735
         });
 
+    const shirtMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0xd8d8d8
+        });
+
+    // HEAD
     const head =
         new THREE.Mesh(
             new THREE.BoxGeometry(
@@ -1758,17 +1779,13 @@ function createOtherPlayer(playerData) {
 
     let bodyMaterial;
 
-    if (
-        playerData.character ===
-        "agent"
-    ) {
-        bodyMaterial =
-            agentMaterial;
+    if (playerData.character === "agent") {
+        bodyMaterial = agentMaterial;
     } else {
-        bodyMaterial =
-            soldierMaterial;
+        bodyMaterial = soldierMaterial;
     }
 
+    // BODY
     const body =
         new THREE.Mesh(
             new THREE.BoxGeometry(
@@ -1783,11 +1800,12 @@ function createOtherPlayer(playerData) {
 
     characterGroup.add(body);
 
+    // ARMS
     const leftArm =
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 0.18,
-                0.75,
+                0.72,
                 0.18
             ),
             bodyMaterial
@@ -1799,15 +1817,13 @@ function createOtherPlayer(playerData) {
         0
     );
 
-    characterGroup.add(
-        leftArm
-    );
+    characterGroup.add(leftArm);
 
     const rightArm =
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 0.18,
-                0.75,
+                0.72,
                 0.18
             ),
             bodyMaterial
@@ -1819,10 +1835,9 @@ function createOtherPlayer(playerData) {
         0
     );
 
-    characterGroup.add(
-        rightArm
-    );
+    characterGroup.add(rightArm);
 
+    // LEGS
     const leftLeg =
         new THREE.Mesh(
             new THREE.BoxGeometry(
@@ -1839,9 +1854,7 @@ function createOtherPlayer(playerData) {
         0
     );
 
-    characterGroup.add(
-        leftLeg
-    );
+    characterGroup.add(leftLeg);
 
     const rightLeg =
         new THREE.Mesh(
@@ -1859,73 +1872,308 @@ function createOtherPlayer(playerData) {
         0
     );
 
-    characterGroup.add(
-        rightLeg
-    );
+    characterGroup.add(rightLeg);
 
-    if (
-        playerData.character ===
-        "soldier"
-    ) {
+    // SOLDIER DETAILS
+    if (playerData.character === "soldier") {
         const helmet =
             new THREE.Mesh(
                 new THREE.BoxGeometry(
-                    0.5,
-                    0.18,
-                    0.5
+                    0.52,
+                    0.2,
+                    0.52
                 ),
-                soldierMaterial
+                soldierDarkMaterial
             );
 
-        helmet.position.y =
-            1.82;
+        helmet.position.y = 1.82;
+
+        characterGroup.add(helmet);
+
+        const helmetFront =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.34,
+                    0.08,
+                    0.18
+                ),
+                soldierDarkMaterial
+            );
+
+        helmetFront.position.set(
+            0,
+            1.76,
+            0.28
+        );
 
         characterGroup.add(
-            helmet
+            helmetFront
         );
 
         const vest =
             new THREE.Mesh(
                 new THREE.BoxGeometry(
-                    0.75,
-                    0.5,
-                    0.45
+                    0.74,
+                    0.54,
+                    0.43
                 ),
-                darkMaterial
+                soldierDarkMaterial
             );
 
-        vest.position.y =
-            1.05;
+        vest.position.y = 1.08;
+
+        characterGroup.add(vest);
+
+        const leftPouch =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.2,
+                    0.18,
+                    0.12
+                ),
+                blackMaterial
+            );
+
+        leftPouch.position.set(
+            -0.2,
+            0.92,
+            0.26
+        );
 
         characterGroup.add(
-            vest
+            leftPouch
+        );
+
+        const rightPouch =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.2,
+                    0.18,
+                    0.12
+                ),
+                blackMaterial
+            );
+
+        rightPouch.position.set(
+            0.2,
+            0.92,
+            0.26
+        );
+
+        characterGroup.add(
+            rightPouch
+        );
+
+        const leftKnee =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.25,
+                    0.18,
+                    0.1
+                ),
+                blackMaterial
+            );
+
+        leftKnee.position.set(
+            -0.18,
+            0.34,
+            0.16
+        );
+
+        characterGroup.add(
+            leftKnee
+        );
+
+        const rightKnee =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.25,
+                    0.18,
+                    0.1
+                ),
+                blackMaterial
+            );
+
+        rightKnee.position.set(
+            0.18,
+            0.34,
+            0.16
+        );
+
+        characterGroup.add(
+            rightKnee
         );
     }
 
-    if (
-        playerData.character ===
-        "agent"
-    ) {
+    // AGENT DETAILS
+    if (playerData.character === "agent") {
+        const shirt =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.36,
+                    0.58,
+                    0.03
+                ),
+                shirtMaterial
+            );
+
+        shirt.position.set(
+            0,
+            1.08,
+            0.19
+        );
+
+        characterGroup.add(shirt);
+
         const tie =
             new THREE.Mesh(
                 new THREE.BoxGeometry(
                     0.08,
-                    0.4,
+                    0.42,
                     0.04
                 ),
-                darkMaterial
+                blackMaterial
             );
 
         tie.position.set(
             0,
-            1.05,
-            0.2
+            1.08,
+            0.22
+        );
+
+        characterGroup.add(tie);
+
+        const hair =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.44,
+                    0.13,
+                    0.44
+                ),
+                darkMaterial
+            );
+
+        hair.position.set(
+            0,
+            1.78,
+            0
+        );
+
+        characterGroup.add(hair);
+
+        const leftShoe =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.24,
+                    0.14,
+                    0.34
+                ),
+                blackMaterial
+            );
+
+        leftShoe.position.set(
+            -0.18,
+            0.06,
+            0.06
         );
 
         characterGroup.add(
-            tie
+            leftShoe
+        );
+
+        const rightShoe =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.24,
+                    0.14,
+                    0.34
+                ),
+                blackMaterial
+            );
+
+        rightShoe.position.set(
+            0.18,
+            0.06,
+            0.06
+        );
+
+        characterGroup.add(
+            rightShoe
         );
     }
+
+    // PISTOL IN HANDS
+    const pistolGroup =
+        new THREE.Group();
+
+    const pistolBody =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                0.12,
+                0.16,
+                0.42
+            ),
+            metalMaterial
+        );
+
+    pistolBody.position.z = 0.18;
+
+    pistolGroup.add(
+        pistolBody
+    );
+
+    const pistolSlide =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                0.14,
+                0.08,
+                0.38
+            ),
+            blackMaterial
+        );
+
+    pistolSlide.position.set(
+        0,
+        0.08,
+        0.18
+    );
+
+    pistolGroup.add(
+        pistolSlide
+    );
+
+    const pistolGrip =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                0.1,
+                0.22,
+                0.1
+            ),
+            blackMaterial
+        );
+
+    pistolGrip.position.set(
+        0,
+        -0.14,
+        0.04
+    );
+
+    pistolGroup.add(
+        pistolGrip
+    );
+
+    pistolGroup.position.set(
+        0.24,
+        1.14,
+        0.42
+    );
+
+    pistolGroup.rotation.x =
+        -0.1;
+
+    characterGroup.add(
+        pistolGroup
+    );
 
     characterGroup.position.set(
         playerData.x,
@@ -1940,8 +2188,23 @@ function createOtherPlayer(playerData) {
     characterGroup.userData.playerId =
         playerData.id;
 
-        characterGroup.userData.character =
-    playerData.character;
+    characterGroup.userData.character =
+        playerData.character;
+
+    characterGroup.userData.leftArm =
+        leftArm;
+
+    characterGroup.userData.rightArm =
+        rightArm;
+
+    characterGroup.userData.leftLeg =
+        leftLeg;
+
+    characterGroup.userData.rightLeg =
+        rightLeg;
+
+    characterGroup.userData.pistol =
+        pistolGroup;
 
     characterGroup.traverse(
         (object) => {
