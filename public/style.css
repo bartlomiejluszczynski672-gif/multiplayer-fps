@@ -275,3 +275,26 @@ canvas {
     opacity: 0.45;
     cursor: not-allowed;
 }
+#readyButton {
+    padding: 14px 28px;
+    margin-top: 10px;
+
+    font-size: 18px;
+
+    border: 2px solid white;
+
+    background: #222;
+    color: white;
+
+    cursor: pointer;
+}
+
+#readyButton.ready {
+    background: #ffffff;
+    color: #111111;
+}
+
+#readyButton:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

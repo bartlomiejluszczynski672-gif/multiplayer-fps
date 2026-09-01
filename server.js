@@ -39,46 +39,65 @@ io.on("connection", (socket) => {
         "Player connected:",
         socket.id
     );
+
     if (hostId === null) {
-    hostId = socket.id;
-    console.log("HOST ID:", hostId);
-    socket.emit("mapSelected", selectedMap);
-    socket.on("selectMap", (mapName) => {
-    if (socket.id !== hostId) {
-        return;
+        hostId = socket.id;
+
+        console.log(
+            "HOST ID:",
+            hostId
+        );
     }
 
-    if (
-        mapName !== "grass" &&
-        mapName !== "industrial"
-    ) {
-        return;
-    }
-
-    selectedMap = mapName;
-
-    io.emit("mapSelected", selectedMap);
-
-    console.log(
-        "Host selected map:",
+    socket.emit(
+        "mapSelected",
         selectedMap
     );
-});
-socket.on("startGame", () => {
-    if (socket.id !== hostId) {
-        return;
-    }
 
-    io.emit("gameStarted", {
-        map: selectedMap
+    socket.on("selectMap", (mapName) => {
+        if (socket.id !== hostId) {
+            return;
+        }
+
+        if (
+            mapName !== "grass" &&
+            mapName !== "industrial"
+        ) {
+            return;
+        }
+
+        selectedMap = mapName;
+
+        io.emit(
+            "mapSelected",
+            selectedMap
+        );
+
+        console.log(
+            "Host selected map:",
+            selectedMap
+        );
     });
 
+    socket.on("toggleReady", () => {
+    const player = players[socket.id];
+
+    if (!player) return;
+
+    if (socket.id === hostId) {
+        return;
+    }
+
+    player.ready = !player.ready;
+
+    io.emit("lobbyPlayers", players);
+
     console.log(
-        "Game started on:",
-        selectedMap
+        "Player ready:",
+        socket.id,
+        player.ready
     );
 });
-}
 
 const spawn =
     getRandomSpawnPoint();
@@ -91,7 +110,8 @@ const spawn =
     health: 100,
     kills: 0,
     deaths: 0,
-    dead: false
+    dead: false,
+    ready: false,
 };
 
 io.emit("lobbyPlayers", players);
@@ -283,10 +303,57 @@ target.z =
             }
         }
     );
+socket.on("selectMap", (mapName) => {
+    if (socket.id !== hostId) {
+        return;
+    }
 
-    socket.on(
-        "disconnect",
-        () => {
+    if (
+        mapName !== "grass" &&
+        mapName !== "industrial"
+    ) {
+        return;
+    }
+
+    selectedMap = mapName;
+
+    io.emit("mapSelected", selectedMap);
+});
+
+socket.on("startGame", () => {
+    if (socket.id !== hostId) {
+        return;
+    }
+
+    const otherPlayers =
+        Object.values(players).filter(
+            (player) => player.id !== hostId
+        );
+
+    const everyoneReady =
+        otherPlayers.every(
+            (player) => player.ready
+        );
+
+    if (!everyoneReady) {
+        console.log(
+            "Cannot start - players are not ready"
+        );
+
+        return;
+    }
+
+    io.emit("gameStarted", {
+        map: selectedMap
+    });
+
+    console.log(
+        "Game started on:",
+        selectedMap
+    );
+});
+
+socket.on("disconnect", () => {
             console.log(
                 "Player disconnected:",
                 socket.id
@@ -316,7 +383,7 @@ target.z =
             );
         }
     );
-});
+  });
 
 server.listen(
     PORT,

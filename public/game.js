@@ -914,7 +914,21 @@ function setupControls() {
 
         socket.emit("startGame");
     });
+const readyButton =
+    document.getElementById("readyButton");
 
+if (readyButton) {
+    readyButton.addEventListener(
+        "click",
+        () => {
+            if (socket.id === currentHostId) {
+                return;
+            }
+
+            socket.emit("toggleReady");
+        }
+    );
+}
     renderer.domElement.addEventListener("click", () => {
         if (isDead) return;
 
@@ -1466,7 +1480,12 @@ function updateLobbyPlayerList() {
         if (playerData.id === currentHostId) {
             playerText += " 👑 HOST";
         }
-
+if (
+    playerData.id !== currentHostId &&
+    playerData.ready
+) {
+    playerText += " ✅ READY";
+}
         playerElement.textContent =
             playerText;
 
@@ -1474,6 +1493,56 @@ function updateLobbyPlayerList() {
             playerElement
         );
     });
+    const myPlayer =
+    latestLobbyPlayers[socket.id];
+
+const readyButton =
+    document.getElementById("readyButton");
+
+if (
+    readyButton &&
+    myPlayer &&
+    socket.id !== currentHostId
+) {
+    if (myPlayer.ready) {
+        readyButton.textContent =
+            "READY ✅";
+
+        readyButton.classList.add(
+            "ready"
+        );
+    } else {
+        readyButton.textContent =
+            "READY";
+
+        readyButton.classList.remove(
+            "ready"
+        );
+        const startButton =
+    document.getElementById("startButton");
+
+if (
+    startButton &&
+    socket.id === currentHostId
+) {
+    const otherPlayers =
+        Object.values(
+            latestLobbyPlayers
+        ).filter(
+            (player) =>
+                player.id !== currentHostId
+        );
+
+    const everyoneReady =
+        otherPlayers.every(
+            (player) => player.ready
+        );
+
+    startButton.disabled =
+        !everyoneReady;
+}
+    }
+}
 }
 socket.on("hostChanged", (hostId) => {
     currentHostId = hostId;
@@ -1521,6 +1590,9 @@ function updateHostControls() {
     const startButton =
         document.getElementById("startButton");
 
+    const readyButton =
+        document.getElementById("readyButton");
+
     const isHost =
         socket.id === currentHostId;
 
@@ -1529,14 +1601,25 @@ function updateHostControls() {
     });
 
     if (startButton) {
-        startButton.disabled = !isHost;
-
         if (isHost) {
+            startButton.style.display =
+                "block";
+
             startButton.textContent =
                 "START GAME";
         } else {
-            startButton.textContent =
-                "WAITING FOR HOST...";
+            startButton.style.display =
+                "none";
+        }
+    }
+
+    if (readyButton) {
+        if (isHost) {
+            readyButton.style.display =
+                "none";
+        } else {
+            readyButton.style.display =
+                "block";
         }
     }
 }
